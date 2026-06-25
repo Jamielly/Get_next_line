@@ -30,6 +30,18 @@ The implementation allows reading the contents of a file or standard input line 
  ├── get_next_line.h       
  └── README.md            
 
+``
+FD
+ ↓
+read_and_join   → enche stash até ter '\n'
+ ↓
+extract_line    → pega linha pronta
+ ↓
+clean_stash     → remove linha usada
+ ↓
+return line
+``
+
 ## Instructions
 ### Requirements
 

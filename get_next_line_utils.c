@@ -15,76 +15,35 @@
 int ft_strlen(char *s)
 {
     int i = 0;
-
-    while (s && s[i])
+    if (!s[i])
+        return (NULL);
+    while (s[i])
         i++;
     return i;
 }
 
-static void	create_list(int fd, const char *ac)
+int check_newline(char *s)
 {
-	int	*buff;
+    if (!s)
+        return 0;
 
-	if (!fd || !ac)
-		return (NULL);
-	while (read(fd, buff, BUFFER_SIZE));
-	char buff[BUFFER_SIZE + 1];
-	buff = malloc(sizeof(int));
-	free(buff);
-	buff = NULL;
-	return (0);
-}
+    while (*s)
+        if (*s++ == '\n')
+            return 1;
 
-char *extract_line(char *stash) //pega tudo ate "\n"
+    return 0;
+
+char *read_and_join(int fd, char *stash)
 {
-    int     i = 0;
-    char    *line;
-
-    if (!stash || !stash[0])
-        return NULL;
-
-    while (stash[i] && stash[i] != '\n')
-        i++;
-
-    line = malloc(i + (stash[i] == '\n' ? 2 : 1));
-    if (!line)
-        return NULL;
-
-    i = 0;
-    while (stash[i] && stash[i] != '\n')
-    {
-        line[i] = stash[i];
-        i++;
-    }
-
-    if (stash[i] == '\n')
-        line[i++] = '\n';
-
-    line[i] = '\0';
-
-    return line;
-}
-
-static char *stash; // coraçao da GNL, sem isso ele nao funciona (Ele guarda o que sobrou da leitura anterior)
-
-char *clean_stash(char *stash)
-{
-	int	polish_list;
-
-	extract_line();
-}
-
-char *read_and_join(int fd, char *stash) //objetivo: acumular tudo até ter pelo menos 1 '\n'
-{
-    char    *buffer;
-    int     bytes;
+    char *buffer;
+    int bytes;
 
     buffer = malloc(BUFFER_SIZE + 1);
     if (!buffer)
         return NULL;
 
     bytes = 1;
-    while (!has_newline(stash) && bytes > 0)
+    while (!check_newline(stash) && bytes > 0)
     {
         bytes = read(fd, buffer, BUFFER_SIZE);
         if (bytes < 0)
@@ -100,28 +59,16 @@ char *read_and_join(int fd, char *stash) //objetivo: acumular tudo até ter pelo
     return stash;
 }
 
-int check_newline(char *s) // checar se tem '\n'
-{
-    if (!s)
-        return 0;
-
-    while (*s)
-    {
-        if (*s == '\n')
-            return 1;
-        s++;
-    }
-    return 0;
-}
-
 char *ft_strjoin(char *s1, char *s2)
 {
-    int     i = 0, j = 0;
-    char    *res;
+    int i = 0, j = 0;
+    char *res;
 
     if (!s1)
     {
         s1 = malloc(1);
+        if (!s1)
+            return NULL;
         s1[0] = '\0';
     }
 
@@ -130,18 +77,7 @@ char *ft_strjoin(char *s1, char *s2)
         return NULL;
 
     while (s1[i])
-        res[i++] = s1[i - i]; // ajustaremos abaixo
-
-		pode ser assim tbm:
-//		 while (s1[i])
-// 	 res[i] = s1[i++];
-
-    i = 0;
-    while (s1[i])
-    {
-        res[i] = s1[i];
-        i++;
-    }
+        res[i] = s1[i++];
 
     while (s2[j])
         res[i++] = s2[j++];
@@ -150,4 +86,57 @@ char *ft_strjoin(char *s1, char *s2)
 
     free(s1);
     return res;
+}
+
+char *extract_line(char *stash)
+ //pega tudo ate "\n"
+ {
+     int i = 0;
+      char *line; 
+      if (!stash || !stash[0]) 
+      return NULL; 
+    while (stash[i] && stash[i] != '\n')
+     i++;
+     line = malloc(i + (stash[i] == '\n' ? 2 : 1));
+      if (!line)
+       return NULL; 
+    i = 0; 
+    while (stash[i] && stash[i] != '\n')
+     {
+         line[i] = stash[i];
+          i++;
+     } 
+     if (stash[i] == '\n') 
+     line[i++] = '\n';
+     line[i] = '\0';
+    return line;
+}
+
+char *clean_stash(char *stash)
+{
+    int i = 0, j = 0;
+    char *new_stash;
+
+    while (stash[i] && stash[i] != '\n')
+        i++;
+
+    if (!stash[i])
+    {
+        free(stash);
+        return NULL;
+    }
+
+    new_stash = malloc(ft_strlen(stash) - i + 1);
+    if (!new_stash)
+        return NULL;
+
+    i++; // pula '\n'
+
+    while (stash[i])
+        new_stash[j++] = stash[i++];
+
+    new_stash[j] = '\0';
+
+    free(stash);
+    return new_stash;
 }

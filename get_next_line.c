@@ -12,52 +12,29 @@
 
 #include "get_next_line.h"
 
-char	*get_next_line(int fd)
-{
-	static t_list		*list;
-	char				*next_line;
-
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &next_line, 0) < 0)
-		return (NULL);
-	create_list(&list, fd);
-	if (list == NULL)
-		return (NULL);
-	next_line = get_line(list);
-	polish_list(&list);
-	return (next_line);
-}
-	//tmp = stash;
-	//stash = ft_strjoin(stash, buffer);
-	//free(tmp);
-
-char *get_next_line(int fd)
-{
-    static char *stash;
-    char *line;
-
-    stash = read_and_join(fd, stash);
-    if (!stash)
-        return NULL;
-
-    line = extract_line(stash);
-    stash = clean_stash(stash);
-
-    return line;
-}
-
 char *get_next_line(int fd)
 {
     static char *stash;
     char        *line;
 
-    if (fd < 0 || BUFFER_SIZE <= 0)
-        return NULL;
+    if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+    {
+        free(stash);
+        stash = NULL;
+        return (NULL);
+    }
 
     stash = read_and_stash(fd, stash);
     if (!stash)
         return NULL;
 
     line = extract_line(stash);
+    if (!line)
+    {
+        free(stash);
+        stash = NULL;
+        return (NULL);
+    }
     stash = clean_stash(stash);
 
     return line;
