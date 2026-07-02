@@ -10,27 +10,24 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
-
-# include <stdlib.h>
-# include <unistd.h>
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42
 # endif
 
-typedef struct s_list
-{
-	char				*str_buf;
-	struct s_list		*next;
-}		t_list;
+# include <unistd.h>
+# include <stdlib.h>
 
 char	*get_next_line(int fd);
 
-static void	ft_strlen(int fd, const char *str);
-static void	create_list(int fd, const char *ac);
-static void	extract_line(int fd, char *line);
-static void reclean_stash(int fd, );
-static void ft_strjoin(int fd, );
+char	*fill_stash(int fd, char *stash);
+int		ft_strlen(const char *str);
+int		check_newline(char	*s);
+char	*ft_strjoin(char *s1, char *s2);
+char	*extract_line(char	*stash);
+char	*clean_stash(char	*stash);
+
 #endif
