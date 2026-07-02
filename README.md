@@ -192,6 +192,5 @@ AI tools were used as learning assistants to:
 
 <p align="center">
   <b>Author:</b> Jamielly R. &nbsp;|&nbsp;
-  <b>42 Login:</b> jamsilva &nbsp;|&nbsp;
   <b>GitHub:</b> <a href="https://github.com/Jamielly">Jamielly</a>
 </p>
