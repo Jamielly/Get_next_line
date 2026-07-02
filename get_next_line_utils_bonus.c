@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*   get_next_line_utils_bonus.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/16 12:20:35 by jamsilva          #+#    #+#             */
-/*   Updated: 2026/07/02 14:43:29 by jamsilva         ###   ########.fr       */
+/*   Created: 2026/07/02 11:20:33 by jamsilva          #+#    #+#             */
+/*   Updated: 2026/07/02 14:49:47 by jamsilva         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 int	ft_strlen(const char *str)
 {
@@ -41,7 +41,7 @@ static	char	*empty_str(void)
 	s = malloc(1);
 	if (!s)
 		return (NULL);
-	s = '\0';
+	s[0] = '\0';
 	return (s);
 }
 
@@ -70,4 +70,33 @@ char	*ft_strjoin(char *s1, char *s2)
 	rest[i] = '\0';
 	free(s1);
 	return (rest);
+}
+
+char	*clean_stash(char	*stash)
+{
+	int		i;
+	int		j;
+	char	*new_stash;
+
+	i = 0;
+	j = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	if (!stash[i])
+	{
+		free(stash);
+		return (NULL);
+	}
+	new_stash = malloc(ft_strlen(stash) - i + 1);
+	if (!new_stash)
+	{
+		free(stash);
+		return (NULL);
+	}
+	i++;
+	while (stash[i])
+		new_stash[j++] = stash[i++];
+	new_stash[j] = '\0';
+	free(stash);
+	return (new_stash);
 }
