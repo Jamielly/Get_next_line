@@ -4,8 +4,6 @@
   <img src="https://img.shields.io/badge/norm-compliant-success?style=flat-square" alt="Norm compliant"/>
 </p>
 
-<p align="center"><i>This project has been created as part of the 42 curriculum by jamsilva</i></p>
-
 <h1 align="center">GET_NEXT_LINE</h1>
 
 > A C function that reads any file descriptor line by line — regardless of buffer size — using static variables to persist state between calls.
