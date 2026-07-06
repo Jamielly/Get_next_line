@@ -1,194 +1,392 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/42-get__next__line-000000?style=flat-square&logo=42&logoColor=white" alt="42 project"/>
-  <img src="https://img.shields.io/badge/language-C-blue?style=flat-square" alt="C language"/>
-  <img src="https://img.shields.io/badge/norm-compliant-success?style=flat-square" alt="Norm compliant"/>
-</p>
+<i>This project has been created as part of the 42 curriculum by **jamsilva**.</i>
 
-<h1 align="center">GET_NEXT_LINE</h1>
+# GET_NEXT_LINE
 
-> A C function that reads any file descriptor line by line — regardless of buffer size — using static variables to persist state between calls.
-
----
-
-## 📑 Table of Contents
-- [Description](#description)
-- [Project Overview](#project-overview)
-- [Function Prototype](#function-prototype)
-- [Allowed External Functions](#allowed-external-functions)
-- [Project Structure](#project-structure)
-- [Instructions](#instructions)
-- [Usage](#usage)
-- [Algorithm Explanation](#algorithm-explanation)
-- [Edge Cases](#edge-cases)
-- [Resources](#resources)
-- [What I Learned](#what-i-learned)
-
----
+![Language](https://img.shields.io/badge/language-C-blue.svg)
+![42](https://img.shields.io/badge/42-Get_Next_Line-black.svg)
+![Status](https://img.shields.io/badge/status-Completed-success.svg)
+![Bonus](https://img.shields.io/badge/bonus-✓-brightgreen.svg)
 
 ## Description
-The goal of this project is to write a function that returns one line at a time from a *file descriptor*. The main challenge lies in handling variable buffer sizes and using **static variables** to preserve data between successive calls, enabling sequential reading of files or standard input (`stdin`).
+
+**get_next_line** is one of the core projects of the 42 curriculum. The objective is to implement a function capable of reading a file descriptor **one line at a time**, regardless of the size of the file or the value of `BUFFER_SIZE`.
+
+The main challenge is preserving unread data between function calls using **static variables**, while ensuring efficient memory management and handling edge cases correctly.
 
 ---
 
-## Project Overview
+# Features
 
-| Aspect | Approach |
-|---|---|
-| **Memory management** | Strict use of `malloc`/`free` with no memory leaks |
-| **Flexible compilation** | `BUFFER_SIZE` defined at compile time for efficiency testing |
-| **Bonus** | Multiple simultaneous file descriptors with a single static variable |
-| **Norm** | Code complies with 42's Norminette |
+* Read one line at a time from any file descriptor.
+* Works with files, standard input, and pipes.
+* Supports any compile-time `BUFFER_SIZE`.
+* Preserves unread data between successive calls.
+* Proper dynamic memory management.
+* No memory leaks.
+* Supports multiple file descriptors simultaneously (Bonus).
 
 ---
 
-## Function Prototype
+# Function Prototype
+
 ```c
 char *get_next_line(int fd);
 ```
 
 ---
 
-## Allowed External Functions
-- `read`
-- `malloc`
-- `free`
+# Allowed Functions
+
+* `read`
+* `malloc`
+* `free`
 
 ---
 
-## Project Structure
+# Project Structure
+
 ```text
 .
-├── get_next_line.c       # Core logic and static variable management
-├── get_next_line_utils.c # Helper functions (strjoin, strlen, strchr, etc.)
-├── get_next_line.h       # Prototypes and macro definitions
-└── README.md             # Project documentation
+├── get_next_line.c
+├── get_next_line_utils.c
+├── get_next_line.h
+├── get_next_line_bonus.c
+├── get_next_line_bonus_utils.c
+├── get_next_line_bonus.h
+└── README.md
 ```
 
 ---
 
-## Instructions
+# How It Works
 
-### Requirements
-- `cc` compiler (or `gcc`/`clang`)
-- UNIX operating system (Linux or macOS)
-
-### Compile
-```bash
-cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
-```
-
-### Check for memory leaks
-```bash
-valgrind --leak-check=full --show-leak-kinds=all ./a.out
+```text
+                 get_next_line(fd)
+                         │
+                         ▼
+               Read BUFFER_SIZE bytes
+                         │
+                         ▼
+              Append data into stash
+                         │
+          ┌──────────────┴──────────────┐
+          │                             │
+     '\n' found?                     EOF?
+          │                             │
+          ▼                             ▼
+ Extract current line          Return remaining data
+          │
+          ▼
+ Clean stash
+          │
+          ▼
+     Return line
 ```
 
 ---
 
-## Usage
-Include the header and call the function in a loop until it returns `NULL`.
+# Mandatory vs Bonus
+
+| Feature                               | Mandatory | Bonus |
+| ------------------------------------- | --------- | ----- |
+| Read line by line                     | ✅         | ✅     |
+| Configurable `BUFFER_SIZE`            | ✅         | ✅     |
+| Dynamic memory management             | ✅         | ✅     |
+| Static buffer                         | ✅         | ✅     |
+| Multiple file descriptors             | ❌         | ✅     |
+| Independent reading state for each FD | ❌         | ✅     |
+
+---
+
+# Mandatory Implementation
+
+The mandatory implementation uses a single static variable to preserve unread data between successive calls.
+
+```text
+          FILE
+            │
+            ▼
+         read()
+            │
+            ▼
+      static stash
+            │
+            ▼
+ extract next line
+            │
+            ▼
+ return line
+```
+
+Since only one static buffer exists, only one reading state is preserved.
+
+---
+
+# Bonus Implementation
+
+The bonus version extends the mandatory implementation by allowing **multiple file descriptors** to be read simultaneously.
+
+Instead of using one static buffer:
 
 ```c
-#include <stdio.h>
+static char *stash;
+```
+
+the bonus version keeps one buffer for each file descriptor:
+
+```c
+static char *stash[OPEN_MAX];
+```
+
+Each file descriptor preserves its own unread data independently.
+
+```text
+               Bonus
+
+FD 3 ─────────► stash[3]
+
+FD 4 ─────────► stash[4]
+
+FD 5 ─────────► stash[5]
+
+FD 6 ─────────► stash[6]
+```
+
+This allows interleaved reading without losing the current position of any file.
+
+Example:
+
+```c
+get_next_line(fd1);
+get_next_line(fd2);
+get_next_line(fd1);
+get_next_line(fd3);
+get_next_line(fd2);
+```
+
+Each file descriptor continues exactly where it previously stopped.
+
+---
+
+# Algorithm
+
+Each function call performs four steps:
+
+### 1. Read
+
+Read data from the file descriptor until:
+
+* a newline (`\n`) is found, or
+* the end of the file (EOF) is reached.
+
+---
+
+### 2. Store
+
+Append the newly read bytes into the persistent buffer (`stash`).
+
+---
+
+### 3. Extract
+
+Extract the next complete line to be returned.
+
+---
+
+### 4. Preserve
+
+Keep the remaining unread bytes inside the static buffer for the next call.
+
+---
+
+# Compilation
+
+Compile using any desired `BUFFER_SIZE`.
+
+```bash
+cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 \
+get_next_line.c get_next_line_utils.c main.c -o gnl_test
+```
+
+---
+
+# Usage
+
+Include the header and repeatedly call `get_next_line()` until it returns `NULL`.
+
+## Example
+
+```c
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 #include "get_next_line.h"
 
 int main(void)
 {
-    int     fd;
-    char    *line;
+	int		fd;
+	char	*line;
 
-    fd = open("test.txt", O_RDONLY);
-    if (fd < 0)
-        return (1);
-    while ((line = get_next_line(fd)) != NULL)
-    {
-        printf("%s", line);
-        free(line); // mandatory: each returned line is heap-allocated
-    }
-    close(fd);
-    return (0);
+	fd = open("test.txt", O_RDONLY);
+	if (fd < 0)
+		return (1);
+	while ((line = get_next_line(fd)) != NULL)
+	{
+		printf("%s", line);
+		free(line);
+	}
+	close(fd);
+	return (0);
 }
 ```
 
 ---
 
-## Algorithm Explanation
+# Bonus Test
 
-The core mechanism relies on a **static variable** — the *stash* — which acts as a buffer between `read` calls and the caller. Data read from the file accumulates there until a full line is ready to be returned.
+Create three text files:
 
 ```
-FILE DESCRIPTOR (fd)
-        │
-        ▼
-┌───────────────────┐
-│  read_and_join    │  reads BUFFER_SIZE bytes, appends to stash
-└────────┬──────────┘
-         │  repeat until '\n' found or EOF
-         ▼
-┌───────────────────┐
-│  extract_line     │  slices everything up to and including '\n'
-└────────┬──────────┘
-         │
-         ├──────────────────────────────────┐
-         ▼                                  ▼
-┌───────────────────┐            ┌────────────────────┐
-│  return line      │            │  clean_stash       │
-│  (to caller)      │            │  (keep remainder)  │
-└───────────────────┘            └────────────────────┘
+arquivo1.txt
+arquivo2.txt
+arquivo3.txt
 ```
 
-**Step by step:**
+Compile using the bonus files:
 
-1. **Read** — `read()` fills a temporary buffer of `BUFFER_SIZE` bytes. That content is joined onto the stash.
-2. **Check** — the stash is scanned for `\n`. If none is found and EOF has not been reached, reading continues.
-3. **Extract** — everything up to and including the first `\n` is allocated as the return string.
-4. **Polish** — whatever remains in the stash after the `\n` is preserved for the next call.
-5. **Memory** — all temporary buffers are freed before returning; only the extracted line is handed to the caller.
+```bash
+cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 \
+get_next_line_bonus.c \
+get_next_line_bonus_utils.c \
+main_bonus.c \
+-o gnl_bonus
+```
 
-**Why a static variable?** The `read` system call does not know about line boundaries. A single `read` may return part of the current line, the `\n`, *and* the beginning of the next line. Without a persistent stash, that overflow data would be permanently lost when the function returns.
+Example test:
+
+```c
+#include "get_next_line_bonus.h"
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int	main(void)
+{
+	int		fd1;
+	int		fd2;
+	int		fd3;
+	char	*line;
+
+	fd1 = open("arquivo1.txt", O_RDONLY);
+	fd2 = open("arquivo2.txt", O_RDONLY);
+	fd3 = open("arquivo3.txt", O_RDONLY);
+
+	if (fd1 < 0 || fd2 < 0 || fd3 < 0)
+		return (1);
+
+	line = get_next_line(fd1);
+	printf("FD1 -> %s", line);
+	free(line);
+
+	line = get_next_line(fd2);
+	printf("FD2 -> %s", line);
+	free(line);
+
+	line = get_next_line(fd1);
+	printf("FD1 -> %s", line);
+	free(line);
+
+	line = get_next_line(fd3);
+	printf("FD3 -> %s", line);
+	free(line);
+
+	close(fd1);
+	close(fd2);
+	close(fd3);
+}
+```
 
 ---
 
-## Edge Cases
+# Running
 
-| Scenario | Behavior |
-|---|---|
-| No trailing `\n` | Last line is returned correctly, null-terminated with `\0` |
-| EOF with empty stash | Returns `NULL` — signals end of input |
-| `read` returns `-1` | Frees internal memory and returns `NULL` — no undefined state |
-| `BUFFER_SIZE = 1` | Correct, but slow — one byte per `read` call |
-| Very large `BUFFER_SIZE` | Correct — stash absorbs all overflow beyond the current line |
-| Empty file | Returns `NULL` on the first call |
-| Multiple fds (bonus) | Each fd is tracked independently via indexed stash |
+```bash
+./gnl_test
+```
 
----
+Bonus:
 
-## Resources
-
-### Documentation
-- `man 2 read` · `man 2 open` · `man 2 close`
-- 42's Subject PDF and Norm document
-
-### AI Usage
-AI tools were used as learning assistants to:
-- Clarify the scope and lifetime of **static variables**
-- Debug memory leaks and understand pointer management with dynamic buffers
-- Generate test cases for extreme `BUFFER_SIZE` values (e.g., `1` or `10000000`)
-
-*All final logic and implementation were written manually to ensure the technical mastery required by 42.*
+```bash
+./gnl_bonus
+```
 
 ---
 
-## What I Learned
-- How **static variables** persist across function calls — and why that matters for stateful I/O
-- Manual heap memory management and preventing segmentation faults
-- Low-level interaction with the filesystem via `read` and file descriptors
-- Buffer-boundary thinking: writing code that is correct regardless of how much `read` returns at once
+# Memory Leak Check
+
+Using Valgrind:
+
+```bash
+valgrind --leak-check=full --show-leak-kinds=all ./gnl_test
+```
+
+or
+
+```bash
+valgrind --leak-check=full --show-leak-kinds=all ./gnl_bonus
+```
 
 ---
 
-<p align="center">
-  <b>Author:</b> Jamielly R. &nbsp;|&nbsp;
-  <b>GitHub:</b> <a href="https://github.com/Jamielly">Jamielly</a>
-</p>
+# Edge Cases Covered
+
+* Empty files
+* Files ending without `\n`
+* Files containing only `\n`
+* Very small `BUFFER_SIZE`
+* Very large `BUFFER_SIZE`
+* Invalid file descriptors
+* Standard input
+* Multiple simultaneous file descriptors (Bonus)
+
+---
+
+# AI Usage
+
+Artificial Intelligence was used strictly as a learning tool to:
+
+* clarify the behavior of static variables;
+* better understand file descriptors and the `read()` system call;
+* discuss edge cases;
+* assist in debugging memory management.
+
+All implementation decisions, coding, testing, debugging, and final validation were completed manually.
+
+---
+
+# What I Learned
+
+This project significantly improved my understanding of:
+
+* Static variables and persistent state.
+* Dynamic memory allocation.
+* Ownership of allocated memory.
+* Low-level file I/O using `read()`.
+* Buffer management.
+* String manipulation without relying on the standard library.
+* Defensive programming.
+* Memory leak prevention.
+* Handling multiple file descriptors independently (Bonus).
+
+Implementing the bonus version reinforced how independent execution states can be maintained simultaneously using indexed static storage.
+
+---
+
+# Author
+
+**Jamielly R.**
+
+GitHub: https://github.com/Jamielly
