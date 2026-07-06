@@ -1,11 +1,6 @@
-<i>This project has been created as part of the 42 curriculum by **jamsilva**.</i>
+<i>This project has been created as part of the 42 curriculum by **jamsilva**</i>
 
 # GET_NEXT_LINE
-
-![Language](https://img.shields.io/badge/language-C-blue.svg)
-![42](https://img.shields.io/badge/42-Get_Next_Line-black.svg)
-![Status](https://img.shields.io/badge/status-Completed-success.svg)
-![Bonus](https://img.shields.io/badge/bonus-✓-brightgreen.svg)
 
 ## Description
 
@@ -390,3 +385,5 @@ Implementing the bonus version reinforced how independent execution states can b
 **Jamielly R.**
 
 GitHub: https://github.com/Jamielly
+
+42 Login: **jamsilva**

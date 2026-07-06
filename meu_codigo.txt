@@ -1,0 +1,467 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/16 12:20:15 by jamsilva          #+#    #+#             */
+/*   Updated: 2026/07/06 11:38:49 by jamsilva         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "get_next_line.h"
+
+char	*fill_stash(int fd, char *stash);
+char	*extract_line(char	*stash);
+char	*clean_stash(char	*stash);
+
+char	*get_next_line(int fd)
+{
+	static char	*stash;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+	{
+		free(stash);
+		stash = NULL;
+		return (NULL);
+	}
+	stash = fill_stash(fd, stash);
+	if (!stash)
+		return (NULL);
+	line = extract_line(stash);
+	if (!line)
+	{
+		free(stash);
+		stash = NULL;
+		return (NULL);
+	}
+	stash = clean_stash(stash);
+	return (line);
+}
+
+char	*fill_stash(int fd, char *stash)
+{
+	char	*buffer;
+	int		bytes;
+
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (NULL);
+	bytes = 1;
+	while (!check_newline(stash) && bytes > 0)
+	{
+		bytes = read(fd, buffer, BUFFER_SIZE);
+		if (bytes == -1)
+		{
+			free(stash);
+			free(buffer);
+			return (NULL);
+		}
+		buffer[bytes] = '\0';
+		stash = ft_strjoin(stash, buffer);
+	}
+	free(buffer);
+	return (stash);
+}
+
+char	*extract_line(char	*stash)
+{
+	size_t		i;
+	size_t		len;
+	char		*line;
+
+	if (!stash || !stash[0])
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	len = i + 1;
+	if (stash[i] == '\n')
+		len++;
+	line = malloc(len + 1);
+	if (!line)
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+	{
+		line[i] = stash[i];
+		i++;
+	}
+	if (stash[i] == '\n')
+		line[i++] = '\n';
+	line[i] = '\0';
+	return (line);
+}
+
+char	*clean_stash(char	*stash)
+{
+	size_t		i;
+	size_t		j;
+	char		*new_stash;
+
+	i = 0;
+	j = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	if (!stash[i])
+	{
+		free(stash);
+		return (NULL);
+	}
+	new_stash = malloc(ft_strlen(stash) - i + 1);
+	if (!new_stash)
+	{
+		free(stash);
+		return (NULL);
+	}
+	i++;
+	while (stash[i])
+		new_stash[j++] = stash[i++];
+	new_stash[j] = '\0';
+	free(stash);
+	return (new_stash);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/16 12:20:35 by jamsilva          #+#    #+#             */
+/*   Updated: 2026/07/06 11:39:54 by jamsilva         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "get_next_line.h"
+
+int	ft_strlen(const char *str)
+{
+	int	i;
+
+	i = 0;
+	if (!str)
+		return (0);
+	while (str[i])
+		i++;
+	return (i);
+}
+
+int	check_newline(char	*s)
+{
+	if (!s)
+		return (0);
+	while (*s)
+		if (*s++ == '\n')
+			return (1);
+	return (0);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char	*dst;
+	size_t	i;
+	size_t	j;
+
+	if (!s2)
+		return (0);
+	if (!s1)
+	{
+		s1 = (char *)malloc(sizeof(char));
+		s1[0] = '\0';
+	}
+	dst = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	if (!dst)
+		return (0);
+	i = 0;
+	j = 0;
+	while (s1[i] != '\0')
+		dst[j++] = s1[i++];
+	i = 0;
+	while (s2[i] != '\0')
+		dst[j++] = s2[i++];
+	dst[j] = '\0';
+	free(s1);
+	return (dst);
+}
+
+//char	*ft_strjoin(char *s1, char *s2)
+//{
+//	size_t					i;
+//	size_t					j;
+//	char				*rest;
+//
+//	j = 0;
+//	if (!s1)
+//		s1 = empty_str();
+//	rest = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+////	if (!s1)
+////		return (NULL);
+//	i = 0;
+//	if (!rest)
+//		return (NULL);
+//	while (s1[i])
+//	{
+//		rest[i] = s1[i];
+//		i++;
+//	}
+//	while (s2[j])
+//		rest[i++] = s2[j++];
+//	rest[i] = '\0';
+//	free(s1);
+//	return (rest);
+//}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/16 12:20:56 by jamsilva          #+#    #+#             */
+/*   Updated: 2026/06/30 09:56:33 by jamsilva         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
+
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
+
+# include <unistd.h>
+# include <stdlib.h>
+
+char	*get_next_line(int fd);
+
+char	*fill_stash(int fd, char *stash);
+int		ft_strlen(const char *str);
+int		check_newline(char	*s);
+char	*ft_strjoin(char *s1, char *s2);
+char	*extract_line(char	*stash);
+char	*clean_stash(char	*stash);
+
+#endif/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line _bonus.c                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/02 11:20:52 by jamsilva          #+#    #+#             */
+/*   Updated: 2026/07/06 11:50:35 by jamsilva         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "get_next_line_bonus.h"
+
+char	*fill_stash(int fd, char *stash);
+
+char	*get_next_line(int fd)
+{
+	static char		*stash[FD_MAX];
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd >= FD_MAX)
+	{
+		free(stash);
+		stash[fd] = NULL;
+		return (NULL);
+	}
+	stash[fd] = fill_stash(fd, stash[fd]);
+	if (!stash[fd])
+		return (NULL);
+	line = extract_line(stash[fd]);
+	if (!line)
+	{
+		free(stash);
+		stash[fd] = NULL;
+		return (NULL);
+	}
+	stash[fd] = clean_stash(stash[fd]);
+	return (line);
+}
+
+char	*fill_stash(int fd, char *stash)
+{
+	char	*buffer;
+	int		bytes;
+
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!stash)
+		return (NULL);
+	bytes = 1;
+	while (!check_newline(stash) && bytes > 0)
+	{
+		bytes = read(fd, buffer, BUFFER_SIZE);
+		if (bytes < 0)
+		{
+			free(stash);
+			free(buffer);
+			return (NULL);
+		}
+	buffer[bytes] = '\0';
+	stash = ft_strjoin(stash, buffer);
+	}
+	free(buffer);
+	return (stash);
+}
+
+char	*extract_line(char	*stash)
+{
+	size_t		i;
+	size_t		len;
+	char	*line;
+
+	if (!stash || !stash[0])
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	len = i + 1;
+	if (stash[i] == '\n')
+		len++;
+	line = malloc(len);
+	if (!line)
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+	{
+		line[i] = stash[i];
+		i++;
+	}
+	if (stash[i] == '\n')
+		line[i++] = '\n';
+	line[i] = '\0';
+	return (line);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/02 11:20:42 by jamsilva          #+#    #+#             */
+/*   Updated: 2026/07/06 11:50:43 by jamsilva         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
+
+# include <unistd.h>
+# include <stdlib.h>
+
+# ifndef  BUFFER_SIZE
+#  define BUFFER_SIZE 1024
+# endif
+
+# ifndef  FD_MAX
+#  define FD_MAX 1024
+# endif
+
+# include <unistd.h>
+# include <stdlib.h>
+
+char	*get_next_line(int fd);
+
+char	*ft_strjoin(char *s1, char *s2);
+char	*extract_line(char	*stash);
+char	*clean_stash(char	*stash);
+
+#endif/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils_bonus.c                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/02 11:20:33 by jamsilva          #+#    #+#             */
+/*   Updated: 2026/07/06 11:42:58 by jamsilva         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "get_next_line_bonus.h"
+
+int	ft_strlen(const char *str)
+{
+	int	i;
+
+	i = 0;
+	if (!str)
+		return (0);
+	while (str[i])
+		i++;
+	return (i);
+}
+
+int	check_newline(char	*s)
+{
+	if (!s)
+		return (0);
+	while (*s)
+		if (*s++ == '\n')
+			return (1);
+	return (0);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char	*dst;
+	size_t	i;
+	size_t	j;
+
+	if (!s2)
+		return (0);
+	if (!s1)
+	{
+		s1 = (char *)malloc(sizeof(char));
+		s1[0] = '\0';
+	}
+	dst = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	if (!dst)
+		return (0);
+	i = 0;
+	j = 0;
+	while (s1[i] != '\0')
+		dst[j++] = s1[i++];
+	i = 0;
+	while (s2[i] != '\0')
+		dst[j++] = s2[i++];
+	dst[j] = '\0';
+	free(s1);
+	return (dst);
+}
+
+char	*clean_stash(char	*stash)
+{
+	size_t		i;
+	size_t		j;
+	char		*new_stash;
+
+	i = 0;
+	j = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	if (!stash[i])
+	{
+		free(stash);
+		return (NULL);
+	}
+	new_stash = malloc(ft_strlen(stash) - i + 1);
+	if (!new_stash)
+	{
+		free(stash);
+		return (NULL);
+	}
+	i++;
+	while (stash[i])
+		new_stash[j++] = stash[i++];
+	new_stash[j] = '\0';
+	free(stash);
+	return (new_stash);
+}

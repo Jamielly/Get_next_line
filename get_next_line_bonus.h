@@ -6,7 +6,7 @@
 /*   By: jamsilva <jamsilva@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 11:20:42 by jamsilva          #+#    #+#             */
-/*   Updated: 2026/07/02 14:42:24 by jamsilva         ###   ########.fr       */
+/*   Updated: 2026/07/06 13:56:11 by jamsilva         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,11 @@
 
 char	*get_next_line(int fd);
 
+int		ft_strlen(const char *str);
+int		check_newline(char *s);
 char	*ft_strjoin(char *s1, char *s2);
-char	*extract_line(char	*stash);
-char	*clean_stash(char	*stash);
+char	*extract_line(char *stash);
+char	*clean_stash(char *stash);
+char	*fill_stash(int fd, char *stash);
 
 #endif
