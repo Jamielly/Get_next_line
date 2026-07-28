@@ -5,6 +5,8 @@
 ![Language](https://img.shields.io/badge/language-C-blue.svg)
 ![42](https://img.shields.io/badge/42-Get_next_line-black.svg)
 ![Status](https://img.shields.io/badge/status-Completed-success.svg)
+![Score](https://img.shields.io/badge/🏆-125%2F100-brightgreen)
+![Norminette](https://img.shields.io/badge/norminette-passing-brightgreen.svg)
 
 ## Description
 
