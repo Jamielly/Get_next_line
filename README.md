@@ -2,6 +2,10 @@
 
 # GET_NEXT_LINE
 
+![Language](https://img.shields.io/badge/language-C-blue.svg)
+![42](https://img.shields.io/badge/42-Get_next_line-black.svg)
+![Status](https://img.shields.io/badge/status-Completed-success.svg)
+
 ## Description
 
 **get_next_line** is one of the core projects of the 42 curriculum. The objective is to implement a function capable of reading a file descriptor **one line at a time**, regardless of the size of the file or the value of `BUFFER_SIZE`.
