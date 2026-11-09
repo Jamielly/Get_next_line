@@ -8,6 +8,16 @@
 ![Score](https://img.shields.io/badge/🏆-125%2F100-brightgreen)
 ![Norminette](https://img.shields.io/badge/norminette-passing-brightgreen.svg)
 
+---
+
+# Illustration
+
+<p align="center">
+  <img src="docs/gnl_sim.gif" alt="Simulação visual da GNL como o buffer funciona" width="720">
+</p>
+
+---
+
 ## Description
 
 **get_next_line** is one of the core projects of the 42 curriculum. The objective is to implement a function capable of reading a file descriptor **one line at a time**, regardless of the size of the file or the value of `BUFFER_SIZE`.
